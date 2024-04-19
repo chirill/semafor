@@ -1,5 +1,5 @@
 ---
-- hosts: pve
+- hosts: ucfin_pve
   tasks:
     - name: Print OS info
       ansible.builtin.package:
