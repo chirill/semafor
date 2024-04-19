@@ -1,6 +1,78 @@
 ---
-- hosts: ucfin_pve
-  tasks:
-    - name: Print OS info
-      ansible.builtin.package:
-        name: btop
+
+- hosts: all
+  tags: update
+  gather_facts: "true"
+  pre_tasks:
+
+  - name: Update all APT distro machines
+    apt:
+      upgrade: yes
+      update_cache: yes
+    when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
+
+  - name: Update all DNF/YUM distros
+    dnf:
+      name: '*'
+      state: latest
+      update_cache: yes
+      update_only: yes
+    when: ansible_distribution == "Fedora" or ansible_distribution == "RedHat"
+
+  - name: Check that the reboot-requied exists
+    stat:
+      path: /var/run/reboot-required
+    register: reboot_req
+
+  - name: Debug reboot
+    debug:
+      msg: "Reboot required"
+    when: reboot_req.stat.exists
+
+
+  # - name: upgrade all dnf packages
+  #   raw: /usr/bin/dnf -y upgrade
+  #   when: ansible_distribution == "Fedora" or ansible_distribution == "RedHat"
+
+# - hosts: all
+#   roles:
+#     - base
+
+# - hosts: fedora_docker
+#   tags: bpytop
+#   roles:
+#     - bpytop
+
+# - hosts: dnf_distro
+#   tags: dnf
+#   gather_facts: false
+#   tasks:
+
+#   - name: Update all Fedora distros
+#     dnf:
+#       update_only: yes
+#       update_cache: yes
+    #when: ansible_distribution == "Fedora"
+
+
+
+# - hosts: debian
+#   #become: true
+#   tasks:
+
+#   - name: Install ncdu space calculator app
+#     package:
+#       name:
+#         - " {{ ncdu_package }} "
+#         - " {{ mc_package }} "
+#       state: latest
+#     when: ansible_distribution == "Debian"
+
+# - hosts: redhat
+#   tasks:
+
+#   - name: Start cockpit service
+#     service:
+#       name: cockpit
+#       enabled: yes
+#       state: started
